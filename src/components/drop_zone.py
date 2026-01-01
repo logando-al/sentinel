@@ -142,13 +142,26 @@ class DropZoneWidget(QWidget):
     def _process_file(self, file_path: str):
         """Process a dropped/selected PDF file."""
         from core.stamper import stamp_pdf
+        from core.settings_manager import settings
         
         self.status_label.setText(f"Processing: {Path(file_path).name}")
         self.progress.setVisible(True)
         self.progress.setRange(0, 0)  # Indeterminate
         
         try:
-            result = stamp_pdf(file_path)
+            # Get output path from settings
+            output_path = None
+            if settings.output_folder:
+                output_path = Path(settings.output_folder) / f"{Path(file_path).stem}_stamped.pdf"
+            
+            result = stamp_pdf(
+                file_path,
+                output_path=output_path,
+                add_visual_seal=settings.seal_enabled,
+                seal_position=settings.seal_position,
+                seal_color=settings.seal_color,
+                seal_text=settings.seal_text
+            )
             self.progress.setVisible(False)
             self.status_label.setText(
                 f"Stamped Successfully!\n"
@@ -163,3 +176,4 @@ class DropZoneWidget(QWidget):
         
         self.status_label.style().unpolish(self.status_label)
         self.status_label.style().polish(self.status_label)
+

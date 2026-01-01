@@ -49,7 +49,9 @@ def stamp_pdf(
     input_path: str | Path,
     output_path: Optional[str | Path] = None,
     add_visual_seal: bool = True,
-    seal_position: str = "top-right"
+    seal_position: str = "top-right",
+    seal_color: str = "#88A9C3",
+    seal_text: str = "SENTINEL VERIFIED"
 ) -> dict:
     """
     Stamp a PDF with SHA256 hash metadata and optional visual seal.
@@ -58,6 +60,9 @@ def stamp_pdf(
         input_path: Path to the input PDF
         output_path: Path for the stamped PDF (defaults to input with '_stamped' suffix)
         add_visual_seal: Whether to add a visible seal on the first page
+        seal_position: Position of seal ('top-right', 'top-left', 'bottom-right', 'bottom-left')
+        seal_color: Hex color for the seal accent
+        seal_text: Text to display on the seal
         seal_position: Position of seal ('top-right', 'top-left', 'bottom-right', 'bottom-left')
         
     Returns:
@@ -95,7 +100,7 @@ def stamp_pdf(
     
     # Add visual seal if requested
     if add_visual_seal and doc.page_count > 0:
-        _add_visual_seal(doc[0], file_hash, timestamp, seal_position)
+        _add_visual_seal(doc[0], file_hash, timestamp, seal_position, seal_color, seal_text)
     
     # Save the stamped PDF
     doc.save(str(output_path))
@@ -115,7 +120,9 @@ def _add_visual_seal(
     page: fitz.Page,
     file_hash: str,
     timestamp: str,
-    position: str
+    position: str,
+    seal_color: str = "#88A9C3",
+    seal_text: str = "SENTINEL VERIFIED"
 ):
     """
     Add a visual seal/badge to a PDF page.
@@ -125,6 +132,8 @@ def _add_visual_seal(
         file_hash: The SHA256 hash to display (truncated)
         timestamp: The timestamp to display
         position: Position of the seal
+        seal_color: Hex color for the seal accent
+        seal_text: Text to display on the seal
     """
     # Seal dimensions
     seal_width = 150
@@ -164,22 +173,29 @@ def _add_visual_seal(
     
     seal_rect = positions.get(position, positions["top-right"])
     
+    # Convert hex color to RGB (0-1 range)
+    def hex_to_rgb(hex_color):
+        hex_color = hex_color.lstrip('#')
+        return tuple(int(hex_color[i:i+2], 16) / 255 for i in (0, 2, 4))
+    
+    accent_rgb = hex_to_rgb(seal_color)
+    
     # Draw seal background
     shape = page.new_shape()
     shape.draw_rect(seal_rect)
-    shape.finish(color=(0.53, 0.66, 0.76), fill=(0.2, 0.2, 0.2), width=1.5)  # #88A9C3 accent
+    shape.finish(color=accent_rgb, fill=(0.2, 0.2, 0.2), width=1.5)
     shape.commit()
     
     # Add text
     short_hash = file_hash[-12:]  # Last 12 chars
     
-    # "VERIFIED" header
+    # Custom seal text header
     page.insert_text(
         (seal_rect.x0 + 10, seal_rect.y0 + 18),
-        "SENTINEL VERIFIED",
+        seal_text[:25],  # Limit length to fit
         fontsize=9,
         fontname="helv",
-        color=(0.53, 0.66, 0.76)  # #88A9C3
+        color=accent_rgb
     )
     
     # Hash snippet

@@ -14,6 +14,7 @@ from components.drop_zone import DropZoneWidget
 from components.batch_view import BatchViewWidget
 from components.watch_view import WatchViewWidget
 from components.verify_view import VerifyViewWidget
+from components.settings_view import SettingsViewWidget
 
 
 # Icon color to match accent
@@ -81,11 +82,13 @@ class PDFSentinelApp(QMainWindow):
         self.batch_view = BatchViewWidget()
         self.watch_view = WatchViewWidget()
         self.verify_view = VerifyViewWidget()
+        self.settings_view = SettingsViewWidget()
         
         self.content_stack.addWidget(self.drop_zone)
         self.content_stack.addWidget(self.batch_view)
         self.content_stack.addWidget(self.watch_view)
         self.content_stack.addWidget(self.verify_view)
+        self.content_stack.addWidget(self.settings_view)
         
         # Sidebar navigation (after views are created)
         sidebar = self._create_sidebar()
@@ -139,11 +142,13 @@ class PDFSentinelApp(QMainWindow):
         layout.addStretch()
         
         # Settings button at bottom
-        settings_btn = QPushButton("   Settings")
-        settings_btn.setIcon(qta.icon("fa5s.cog", color=ICON_COLOR))
-        settings_btn.setIconSize(QSize(18, 18))
-        settings_btn.setObjectName("navButton")
-        layout.addWidget(settings_btn)
+        self.settings_btn = QPushButton("   Settings")
+        self.settings_btn.setIcon(qta.icon("fa5s.cog", color=ICON_COLOR))
+        self.settings_btn.setIconSize(QSize(18, 18))
+        self.settings_btn.setObjectName("navButton")
+        self.settings_btn.setCheckable(True)
+        self.settings_btn.clicked.connect(lambda: self._switch_view(self.settings_view))
+        layout.addWidget(self.settings_btn)
         
         # Version label
         version = QLabel("v1.0.0")
