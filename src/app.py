@@ -186,7 +186,7 @@ class PDFSentinelApp(QMainWindow):
         layout.addWidget(self.settings_btn)
         
         # Version label (clickable for About)
-        version = QPushButton("v1.3.1")
+        version = QPushButton("v1.3.2")
         version.setObjectName("versionLabel")
         version.setFlat(True)
         version.setCursor(Qt.CursorShape.PointingHandCursor)
