@@ -9,8 +9,10 @@ from typing import Optional
 from dataclasses import dataclass
 
 
+from core.version import __version__
+
 GITHUB_REPO = "logando-al/sentinel"
-CURRENT_VERSION = "1.3.2"
+CURRENT_VERSION = __version__
 
 
 @dataclass

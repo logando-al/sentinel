@@ -6,10 +6,12 @@ A stealth desktop tool for legal teams to hash, stamp, and verify PDF document i
 
 import sys
 import os
+import atexit
 from pathlib import Path
 from PyQt6.QtWidgets import QApplication
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QFont
+from core.version import __version__
 
 
 def get_resource_path(relative_path: str) -> Path:
@@ -26,6 +28,18 @@ def get_resource_path(relative_path: str) -> Path:
 
 def main():
     """Initialize and run the PDF Sentinel application."""
+    # Helper to clean up temp files on exit
+    def cleanup_temp():
+        try:
+            temp_dir = Path(os.environ['TEMP']) / "sentinel_splash"
+            if temp_dir.exists():
+                import shutil
+                shutil.rmtree(temp_dir, ignore_errors=True)
+        except:
+            pass
+    
+    atexit.register(cleanup_temp)
+
     # Enable High DPI scaling
     QApplication.setHighDpiScaleFactorRoundingPolicy(
         Qt.HighDpiScaleFactorRoundingPolicy.PassThrough
@@ -33,7 +47,7 @@ def main():
     
     app = QApplication(sys.argv)
     app.setApplicationName("PDF Sentinel")
-    app.setApplicationVersion("1.3.2")
+    app.setApplicationVersion(__version__)
     app.setOrganizationName("Sentinel")
     
     # Set default font

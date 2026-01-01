@@ -13,9 +13,11 @@ import fitz  # PyMuPDF
 from core.hasher import calculate_sha256
 
 
+from core.version import __version__
+
 # Sentinel metadata keys
 SENTINEL_METADATA_KEY = "sentinel_data"
-SENTINEL_VERSION = "1.3.2"
+SENTINEL_VERSION = __version__
 
 
 def _calculate_content_hash(doc: fitz.Document) -> str:

@@ -186,7 +186,8 @@ class PDFSentinelApp(QMainWindow):
         layout.addWidget(self.settings_btn)
         
         # Version label (clickable for About)
-        version = QPushButton("v1.3.2")
+        from core.version import __version__
+        version = QPushButton(f"v{__version__}")
         version.setObjectName("versionLabel")
         version.setFlat(True)
         version.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -202,10 +203,12 @@ class PDFSentinelApp(QMainWindow):
         # Update button states
         for btn, w in self.nav_buttons:
             btn.setChecked(w == widget)
+        self.settings_btn.setChecked(widget == self.settings_view)
     
     def _show_about(self):
         """Show About dialog."""
         from PyQt6.QtWidgets import QMessageBox, QApplication
+        from core.version import __version__
         
         # Get key fingerprint
         try:
@@ -220,7 +223,7 @@ class PDFSentinelApp(QMainWindow):
         
         about_text = f"""
 <h2>PDF Sentinel</h2>
-<p><b>Version:</b> 1.3.2</p>
+<p><b>Version:</b> {__version__}</p>
 <p><b>Description:</b> Secure document verification and stamping tool for legal teams.</p>
 <p><b>Your Key Fingerprint:</b><br><code>{fingerprint}</code></p>
 <p><b>Last Updated:</b> 2026-01-01</p>

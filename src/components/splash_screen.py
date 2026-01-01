@@ -102,10 +102,11 @@ class SplashScreen(QSplashScreen):
                         "Secure Document Verification")
         
         # Version
+        from core.version import __version__
         painter.setPen(QColor("#88A9C3"))
         font = QFont("Segoe UI", 10)
         painter.setFont(font)
-        painter.drawText(0, 280, width, 20, Qt.AlignmentFlag.AlignCenter, "v1.3.2")
+        painter.drawText(0, 280, width, 20, Qt.AlignmentFlag.AlignCenter, f"v{__version__}")
         
         painter.end()
         return pixmap
