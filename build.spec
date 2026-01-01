@@ -5,7 +5,9 @@ PDF Sentinel - PyInstaller Build Specification
 
 import sys
 from pathlib import Path
-from PyInstaller.utils.hooks import collect_data_files
+from PyInstaller.utils.hooks import collect_data_files, collect_submodules
+
+# ...
 
 block_cipher = None
 
@@ -15,6 +17,9 @@ src_path = Path('.') / 'src'
 # Collect qtawesome fonts and icons
 qtawesome_datas = collect_data_files('qtawesome')
 
+# Collect all PyQt6 modules to prevent missing imports
+pyqt6_hidden_imports = collect_submodules('PyQt6')
+
 a = Analysis(
     [str(src_path / 'main.py')],
     pathex=[str(src_path)],
@@ -23,9 +28,6 @@ a = Analysis(
         (str(src_path / 'assets'), 'assets'),
     ] + qtawesome_datas,
     hiddenimports=[
-        'PyQt6.QtCore',
-        'PyQt6.QtWidgets', 
-        'PyQt6.QtGui',
         'fitz',
         'watchdog.observers',
         'watchdog.events',
@@ -33,7 +35,7 @@ a = Analysis(
         'reportlab.lib',
         'qtawesome',
         'qtpy',
-    ],
+    ] + pyqt6_hidden_imports,
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
