@@ -4,10 +4,10 @@ PDF Sentinel - Main Application Window
 
 from PyQt6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-    QStackedWidget, QPushButton, QLabel, QFrame
+    QStackedWidget, QPushButton, QLabel, QFrame, QFileDialog
 )
 from PyQt6.QtCore import Qt, QSize
-from PyQt6.QtGui import QIcon
+from PyQt6.QtGui import QIcon, QShortcut, QKeySequence
 import qtawesome as qta
 
 from components.drop_zone import DropZoneWidget
@@ -38,6 +38,41 @@ class PDFSentinelApp(QMainWindow):
         
         # Setup UI
         self._setup_ui()
+        
+        # Setup keyboard shortcuts
+        self._setup_shortcuts()
+    
+    def _setup_shortcuts(self):
+        """Setup keyboard shortcuts."""
+        # Ctrl+O - Open file
+        QShortcut(QKeySequence("Ctrl+O"), self, self._open_file)
+        
+        # Ctrl+B - Batch view
+        QShortcut(QKeySequence("Ctrl+B"), self, lambda: self._switch_view(self.batch_view))
+        
+        # Ctrl+V - Verify view  
+        QShortcut(QKeySequence("Ctrl+Shift+V"), self, lambda: self._switch_view(self.verify_view))
+        
+        # Ctrl+, - Settings
+        QShortcut(QKeySequence("Ctrl+,"), self, lambda: self._switch_view(self.settings_view))
+        
+        # Escape - Home
+        QShortcut(QKeySequence("Escape"), self, lambda: self._switch_view(self.drop_zone))
+        
+        # Ctrl+W - Watch folder view
+        QShortcut(QKeySequence("Ctrl+W"), self, lambda: self._switch_view(self.watch_view))
+    
+    def _open_file(self):
+        """Open file dialog and process selected PDF."""
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Select PDF File",
+            "",
+            "PDF Files (*.pdf);;All Files (*)"
+        )
+        if file_path:
+            self._switch_view(self.drop_zone)
+            self.drop_zone._process_file(file_path)
     
     def _set_window_icon(self):
         """Set the window icon."""
@@ -151,7 +186,7 @@ class PDFSentinelApp(QMainWindow):
         layout.addWidget(self.settings_btn)
         
         # Version label
-        version = QLabel("v1.0.0")
+        version = QLabel("v1.2.0")
         version.setObjectName("versionLabel")
         version.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(version)

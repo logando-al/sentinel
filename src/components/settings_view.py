@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel,
     QPushButton, QFileDialog, QFrame, QLineEdit,
     QComboBox, QCheckBox, QColorDialog, QGroupBox,
-    QFormLayout, QMessageBox
+    QFormLayout, QMessageBox, QScrollArea
 )
 from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QColor
@@ -30,9 +30,24 @@ class SettingsViewWidget(QWidget):
     
     def _setup_ui(self):
         """Initialize the UI."""
-        layout = QVBoxLayout(self)
+        # Main layout for scroll area
+        main_layout = QVBoxLayout(self)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        
+        # Scroll area for content
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setFrameShape(QFrame.Shape.NoFrame)
+        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        
+        # Content widget inside scroll area
+        content_widget = QWidget()
+        layout = QVBoxLayout(content_widget)
         layout.setContentsMargins(30, 30, 30, 30)
         layout.setSpacing(20)
+        
+        scroll_area.setWidget(content_widget)
+        main_layout.addWidget(scroll_area)
         
         # Header
         header = QLabel("Settings")
@@ -71,14 +86,20 @@ class SettingsViewWidget(QWidget):
         # Seal Settings Group
         seal_group = QGroupBox("Seal Settings")
         seal_group.setObjectName("settingsGroup")
-        seal_layout = QFormLayout(seal_group)
+        seal_layout = QVBoxLayout(seal_group)
+        seal_layout.setSpacing(8)
         
         # Enable seal checkbox
         self.seal_enabled_check = QCheckBox("Add visual seal to stamped PDFs")
         self.seal_enabled_check.stateChanged.connect(self._on_seal_enabled_changed)
-        seal_layout.addRow("", self.seal_enabled_check)
+        seal_layout.addWidget(self.seal_enabled_check)
+        seal_layout.addSpacing(30)
         
-        # Seal position
+        # Seal position row
+        position_row = QHBoxLayout()
+        position_label = QLabel("Position:")
+        position_label.setFixedWidth(80)
+        position_row.addWidget(position_label)
         self.seal_position_combo = QComboBox()
         self.seal_position_combo.addItems([
             "Top Right",
@@ -87,31 +108,59 @@ class SettingsViewWidget(QWidget):
             "Bottom Left"
         ])
         self.seal_position_combo.setObjectName("settingsCombo")
-        seal_layout.addRow("Position:", self.seal_position_combo)
+        position_row.addWidget(self.seal_position_combo)
+        position_row.addStretch()
+        seal_layout.addLayout(position_row)
+        seal_layout.addSpacing(8)
         
-        # Seal color
-        color_layout = QHBoxLayout()
+        # Seal color row
+        color_row = QHBoxLayout()
+        color_label = QLabel("Color:")
+        color_label.setFixedWidth(80)
+        color_row.addWidget(color_label)
         self.seal_color_preview = QLabel()
         self.seal_color_preview.setFixedSize(32, 32)
         self.seal_color_preview.setObjectName("colorPreview")
-        color_layout.addWidget(self.seal_color_preview)
-        
+        color_row.addWidget(self.seal_color_preview)
         self.seal_color_btn = QPushButton("  Choose Color")
         self.seal_color_btn.setIcon(qta.icon("fa5s.palette", color=ICON_COLOR))
         self.seal_color_btn.setIconSize(QSize(14, 14))
         self.seal_color_btn.setObjectName("secondaryButton")
         self.seal_color_btn.clicked.connect(self._choose_seal_color)
-        color_layout.addWidget(self.seal_color_btn)
-        color_layout.addStretch()
-        seal_layout.addRow("Color:", color_layout)
+        color_row.addWidget(self.seal_color_btn)
+        color_row.addStretch()
+        seal_layout.addLayout(color_row)
+        seal_layout.addSpacing(8)
         
-        # Seal text
+        # Seal text row
+        text_row = QHBoxLayout()
+        text_label = QLabel("Seal Text:")
+        text_label.setFixedWidth(80)
+        text_row.addWidget(text_label)
         self.seal_text_input = QLineEdit()
         self.seal_text_input.setPlaceholderText("SENTINEL VERIFIED")
         self.seal_text_input.setMaxLength(30)
-        seal_layout.addRow("Seal Text:", self.seal_text_input)
+        text_row.addWidget(self.seal_text_input)
+        seal_layout.addLayout(text_row)
         
         layout.addWidget(seal_group)
+        
+        # App Settings Group
+        app_group = QGroupBox("App Settings")
+        app_group.setObjectName("settingsGroup")
+        app_layout = QFormLayout(app_group)
+        
+        # Theme toggle
+        self.theme_combo = QComboBox()
+        self.theme_combo.addItems(["Dark", "Light"])
+        self.theme_combo.setObjectName("settingsCombo")
+        app_layout.addRow("Theme:", self.theme_combo)
+        
+        # Sound enabled
+        self.sound_check = QCheckBox("Enable sound feedback")
+        app_layout.addRow("", self.sound_check)
+        
+        layout.addWidget(app_group)
         
         layout.addStretch()
         
@@ -162,6 +211,12 @@ class SettingsViewWidget(QWidget):
         # Seal text
         self.seal_text_input.setText(settings.seal_text)
         
+        # Theme
+        self.theme_combo.setCurrentIndex(0 if settings.theme == "dark" else 1)
+        
+        # Sound
+        self.sound_check.setChecked(settings.sound_enabled)
+        
         # Update enabled state
         self._on_seal_enabled_changed()
     
@@ -184,7 +239,39 @@ class SettingsViewWidget(QWidget):
         text = self.seal_text_input.text().strip()
         settings.seal_text = text if text else "SENTINEL VERIFIED"
         
+        # Theme
+        new_theme = "dark" if self.theme_combo.currentIndex() == 0 else "light"
+        if new_theme != settings.theme:
+            settings.theme = new_theme
+            self._apply_theme(new_theme)
+        
+        # Sound
+        settings.sound_enabled = self.sound_check.isChecked()
+        
         QMessageBox.information(self, "Settings Saved", "Your settings have been saved.")
+    
+    def _apply_theme(self, theme_name: str):
+        """Apply the selected theme to the application."""
+        import sys
+        from pathlib import Path
+        from PyQt6.QtWidgets import QApplication
+        
+        # Get resource path
+        if getattr(sys, 'frozen', False):
+            base_path = Path(sys._MEIPASS)
+        else:
+            base_path = Path(__file__).parent.parent
+        
+        if theme_name == "light":
+            style_file = base_path / "assets" / "styles_light.qss"
+        else:
+            style_file = base_path / "assets" / "styles.qss"
+        
+        try:
+            with open(style_file, "r", encoding="utf-8") as f:
+                QApplication.instance().setStyleSheet(f.read())
+        except FileNotFoundError:
+            pass
     
     def _browse_output_folder(self):
         """Open folder dialog for output folder."""

@@ -35,15 +35,21 @@ def main():
     
     app = QApplication(sys.argv)
     app.setApplicationName("PDF Sentinel")
-    app.setApplicationVersion("1.0.0")
+    app.setApplicationVersion("1.2.0")
     app.setOrganizationName("Sentinel")
     
     # Set default font
     font = QFont("Segoe UI", 10)
     app.setFont(font)
     
-    # Load stylesheet
-    stylesheet_path = get_resource_path("assets/styles.qss")
+    # Load stylesheet based on saved theme preference
+    from core.settings_manager import settings
+    theme = settings.theme
+    if theme == "light":
+        stylesheet_path = get_resource_path("assets/styles_light.qss")
+    else:
+        stylesheet_path = get_resource_path("assets/styles.qss")
+    
     try:
         with open(stylesheet_path, "r", encoding="utf-8") as f:
             app.setStyleSheet(f.read())

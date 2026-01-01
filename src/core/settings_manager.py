@@ -21,6 +21,8 @@ DEFAULTS = {
     
     # App settings
     "last_folder": "",
+    "theme": "dark",  # dark or light
+    "sound_enabled": True,
 }
 
 
@@ -128,6 +130,22 @@ class SettingsManager:
     @seal_text.setter
     def seal_text(self, value: str):
         self.set("seal_text", value)
+    
+    @property
+    def theme(self) -> str:
+        return self.get("theme", "dark")
+    
+    @theme.setter
+    def theme(self, value: str):
+        self.set("theme", value)
+    
+    @property
+    def sound_enabled(self) -> bool:
+        return self.get("sound_enabled", True)
+    
+    @sound_enabled.setter
+    def sound_enabled(self, value: bool):
+        self.set("sound_enabled", value)
 
 
 # Global settings instance
