@@ -4,6 +4,7 @@
 # GUI Framework
 PyQt6>=6.6.0
 qtawesome>=1.3.0
+cryptography>=1.3.0
 
 # PDF Manipulation
 pypdf>=4.0.0

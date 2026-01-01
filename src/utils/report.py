@@ -72,6 +72,19 @@ def generate_verification_report(
     # Build the content
     content = []
     
+    # Add Sentinel logo from icon.png
+    import sys
+    if getattr(sys, 'frozen', False):
+        icon_path = Path(sys._MEIPASS) / "assets" / "icon.png"
+    else:
+        icon_path = Path(__file__).parent.parent / "assets" / "icon.png"
+    
+    if icon_path.exists():
+        logo = Image(str(icon_path), width=1*inch, height=1*inch)
+        logo.hAlign = 'CENTER'
+        content.append(logo)
+        content.append(Spacer(1, 20))
+    
     # Header
     content.append(Paragraph("PDF Sentinel", title_style))
     content.append(Paragraph("Document Verification Report", subtitle_style))

@@ -186,7 +186,7 @@ class PDFSentinelApp(QMainWindow):
         layout.addWidget(self.settings_btn)
         
         # Version label
-        version = QLabel("v1.2.0")
+        version = QLabel("v1.3.0")
         version.setObjectName("versionLabel")
         version.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(version)

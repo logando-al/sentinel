@@ -28,16 +28,19 @@ class VerificationResult:
     current_hash: Optional[str] = None
     timestamp: Optional[str] = None
     version: Optional[str] = None
+    signature_valid: Optional[bool] = None
+    key_fingerprint: Optional[str] = None
 
 
 def verify_pdf(pdf_path: str | Path) -> VerificationResult:
     """
-    Verify the integrity of a stamped PDF file.
+    Verify a Sentinel-stamped PDF file.
     
-    The verification process:
-    1. Extract Sentinel metadata from the PDF
-    2. Calculate the current content hash
+    This checks:
+    1. If the PDF has Sentinel metadata
+    2. Recalculates the content hash
     3. Compare with the stored content hash
+    4. Verify digital signature (if present)
     
     Args:
         pdf_path: Path to the PDF file to verify
@@ -73,6 +76,8 @@ def verify_pdf(pdf_path: str | Path) -> VerificationResult:
     stored_content_hash = metadata.get("sentinel_content_hash")
     timestamp = metadata.get("sentinel_timestamp")
     version = metadata.get("sentinel_version")
+    signature = metadata.get("sentinel_signature")
+    key_fingerprint = metadata.get("sentinel_key_fingerprint")
     
     if not original_hash:
         return VerificationResult(
@@ -100,15 +105,40 @@ def verify_pdf(pdf_path: str | Path) -> VerificationResult:
             message="Failed to calculate content hash"
         )
     
+    # Verify digital signature if present
+    signature_valid = None
+    if signature and key_fingerprint:
+        try:
+            from core.signer import verify_signature, get_public_key_pem, get_key_fingerprint
+            public_key = get_public_key_pem()
+            local_fingerprint = get_key_fingerprint(public_key)
+            
+            # Only verify if key fingerprints match (same machine)
+            if local_fingerprint == key_fingerprint:
+                signature_valid = verify_signature(stored_content_hash, signature, public_key)
+            else:
+                # Different key - can't verify but document may still be valid
+                signature_valid = None
+        except Exception:
+            signature_valid = None
+    
     # Compare hashes
     if stored_content_hash == current_content_hash:
+        sig_msg = ""
+        if signature_valid is True:
+            sig_msg = " | Signature verified"
+        elif signature_valid is False:
+            sig_msg = " | Signature INVALID"
+        
         return VerificationResult(
             status=VerificationStatus.VERIFIED,
-            message="Document integrity verified - No tampering detected",
+            message=f"Document integrity verified - No tampering detected{sig_msg}",
             original_hash=original_hash,
             current_hash=current_content_hash,
             timestamp=timestamp,
-            version=version
+            version=version,
+            signature_valid=signature_valid,
+            key_fingerprint=key_fingerprint
         )
     else:
         return VerificationResult(
@@ -117,7 +147,9 @@ def verify_pdf(pdf_path: str | Path) -> VerificationResult:
             original_hash=original_hash,
             current_hash=current_content_hash,
             timestamp=timestamp,
-            version=version
+            version=version,
+            signature_valid=False,
+            key_fingerprint=key_fingerprint
         )
 
 

@@ -23,6 +23,7 @@ DEFAULTS = {
     "last_folder": "",
     "theme": "dark",  # dark or light
     "sound_enabled": True,
+    "language": "en",  # en or ms
 }
 
 
@@ -146,6 +147,14 @@ class SettingsManager:
     @sound_enabled.setter
     def sound_enabled(self, value: bool):
         self.set("sound_enabled", value)
+    
+    @property
+    def language(self) -> str:
+        return self.get("language", "en")
+    
+    @language.setter
+    def language(self, value: str):
+        self.set("language", value)
 
 
 # Global settings instance

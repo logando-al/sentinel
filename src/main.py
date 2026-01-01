@@ -8,10 +8,8 @@ import sys
 import os
 from pathlib import Path
 from PyQt6.QtWidgets import QApplication
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QFont
-
-from app import PDFSentinelApp
 
 
 def get_resource_path(relative_path: str) -> Path:
@@ -35,12 +33,22 @@ def main():
     
     app = QApplication(sys.argv)
     app.setApplicationName("PDF Sentinel")
-    app.setApplicationVersion("1.2.0")
+    app.setApplicationVersion("1.3.0")
     app.setOrganizationName("Sentinel")
     
     # Set default font
     font = QFont("Segoe UI", 10)
     app.setFont(font)
+    
+    # Show splash screen
+    from components.splash_screen import SplashScreen
+    splash = SplashScreen()
+    splash.show()
+    app.processEvents()
+    
+    # Progress: Loading settings
+    splash.set_progress(20, "Loading settings...")
+    app.processEvents()
     
     # Load stylesheet based on saved theme preference
     from core.settings_manager import settings
@@ -50,18 +58,37 @@ def main():
     else:
         stylesheet_path = get_resource_path("assets/styles.qss")
     
+    splash.set_progress(40, "Applying theme...")
+    app.processEvents()
+    
     try:
         with open(stylesheet_path, "r", encoding="utf-8") as f:
             app.setStyleSheet(f.read())
     except FileNotFoundError:
         print(f"Stylesheet not found at: {stylesheet_path}")
     
-    # Create and show main window
+    splash.set_progress(60, "Loading components...")
+    app.processEvents()
+    
+    # Import main app (this loads all components)
+    from app import PDFSentinelApp
+    
+    splash.set_progress(80, "Initializing application...")
+    app.processEvents()
+    
+    # Create main window
     window = PDFSentinelApp()
-    window.show()
+    
+    splash.set_progress(100, "Ready!")
+    app.processEvents()
+    
+    # Short delay to show 100% complete
+    QTimer.singleShot(500, splash.close)
+    QTimer.singleShot(500, window.show)
     
     sys.exit(app.exec())
 
 
 if __name__ == "__main__":
     main()
+

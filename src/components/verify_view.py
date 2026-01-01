@@ -186,7 +186,17 @@ class VerifyViewWidget(QWidget):
         if result.timestamp:
             details += f"Stamped: {result.timestamp}\n"
         if result.version:
-            details += f"Version: {result.version}"
+            details += f"Version: {result.version}\n"
+        
+        # Signature status
+        if result.signature_valid is True:
+            details += f"\n✓ SIGNATURE VERIFIED\n"
+            if result.key_fingerprint:
+                details += f"Key: {result.key_fingerprint}"
+        elif result.signature_valid is False:
+            details += f"\n✗ SIGNATURE INVALID"
+        elif result.key_fingerprint:
+            details += f"\n⚠ Signature present (different key)\nKey: {result.key_fingerprint}"
         
         self.result_details.setText(details)
         

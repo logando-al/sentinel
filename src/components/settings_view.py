@@ -160,6 +160,20 @@ class SettingsViewWidget(QWidget):
         self.sound_check = QCheckBox("Enable sound feedback")
         app_layout.addRow("", self.sound_check)
         
+        # Language selector
+        self.language_combo = QComboBox()
+        self.language_combo.addItems(["English", "Bahasa Melayu"])
+        self.language_combo.setObjectName("settingsCombo")
+        app_layout.addRow("Language:", self.language_combo)
+        
+        # Check for updates button
+        update_btn = QPushButton("  Check for Updates")
+        update_btn.setIcon(qta.icon("fa5s.sync-alt", color=ICON_COLOR))
+        update_btn.setIconSize(QSize(14, 14))
+        update_btn.setObjectName("secondaryButton")
+        update_btn.clicked.connect(self._check_for_updates)
+        app_layout.addRow("", update_btn)
+        
         layout.addWidget(app_group)
         
         layout.addStretch()
@@ -217,6 +231,9 @@ class SettingsViewWidget(QWidget):
         # Sound
         self.sound_check.setChecked(settings.sound_enabled)
         
+        # Language
+        self.language_combo.setCurrentIndex(0 if settings.language == "en" else 1)
+        
         # Update enabled state
         self._on_seal_enabled_changed()
     
@@ -239,14 +256,22 @@ class SettingsViewWidget(QWidget):
         text = self.seal_text_input.text().strip()
         settings.seal_text = text if text else "SENTINEL VERIFIED"
         
-        # Theme
+        # Theme - always save from UI, only apply if actually different
         new_theme = "dark" if self.theme_combo.currentIndex() == 0 else "light"
-        if new_theme != settings.theme:
-            settings.theme = new_theme
+        current_theme = settings.theme if settings.theme in ["dark", "light"] else "dark"
+        settings.theme = new_theme
+        if new_theme != current_theme:
             self._apply_theme(new_theme)
         
         # Sound
         settings.sound_enabled = self.sound_check.isChecked()
+        
+        # Language
+        new_lang = "en" if self.language_combo.currentIndex() == 0 else "ms"
+        if new_lang != settings.language:
+            settings.language = new_lang
+            QMessageBox.information(self, "Language Changed", 
+                "Language change will take effect after restarting the application.")
         
         QMessageBox.information(self, "Settings Saved", "Your settings have been saved.")
     
@@ -318,3 +343,45 @@ class SettingsViewWidget(QWidget):
             settings.reset_defaults()
             self._load_settings()
             QMessageBox.information(self, "Settings Reset", "Settings have been reset to defaults.")
+    
+    def _check_for_updates(self):
+        """Check for application updates."""
+        from core.updater import check_for_updates, open_download_page
+        
+        # Show checking message
+        self.setCursor(Qt.CursorShape.WaitCursor)
+        
+        update_info = check_for_updates()
+        
+        self.setCursor(Qt.CursorShape.ArrowCursor)
+        
+        if update_info.available:
+            # Update available - show details with changelog
+            changelog = update_info.changelog or "No changelog available."
+            if len(changelog) > 500:
+                changelog = changelog[:500] + "..."
+            
+            msg = QMessageBox(self)
+            msg.setIcon(QMessageBox.Icon.Information)
+            msg.setWindowTitle("Update Available")
+            msg.setText(f"A new version is available!")
+            msg.setInformativeText(
+                f"Current: v{update_info.current_version}\n"
+                f"Latest: v{update_info.latest_version}\n"
+                f"Released: {update_info.release_date or 'Unknown'}"
+            )
+            msg.setDetailedText(f"Changelog:\n\n{changelog}")
+            msg.setStandardButtons(
+                QMessageBox.StandardButton.Open | QMessageBox.StandardButton.Cancel
+            )
+            msg.button(QMessageBox.StandardButton.Open).setText("Download")
+            
+            if msg.exec() == QMessageBox.StandardButton.Open:
+                open_download_page(update_info.download_url)
+        else:
+            QMessageBox.information(
+                self,
+                "No Updates",
+                f"You are running the latest version (v{update_info.current_version})."
+            )
+

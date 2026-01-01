@@ -15,7 +15,7 @@ from core.hasher import calculate_sha256
 
 # Sentinel metadata keys
 SENTINEL_METADATA_KEY = "sentinel_data"
-SENTINEL_VERSION = "1.0.0"
+SENTINEL_VERSION = "1.3.0"
 
 
 def _calculate_content_hash(doc: fitz.Document) -> str:
@@ -85,12 +85,20 @@ def stamp_pdf(
     # Calculate content hash BEFORE adding seal (for tamper detection)
     content_hash = _calculate_content_hash(doc)
     
+    # Generate digital signature
+    from core.signer import sign_hash, get_public_key_pem, get_key_fingerprint
+    public_key_pem = get_public_key_pem()
+    signature = sign_hash(content_hash)
+    key_fingerprint = get_key_fingerprint(public_key_pem)
+    
     # Create sentinel metadata
     sentinel_data = {
         "sentinel_hash": file_hash,
-        "sentinel_content_hash": content_hash,  # NEW: content-based hash for verification
+        "sentinel_content_hash": content_hash,
         "sentinel_timestamp": timestamp,
-        "sentinel_version": SENTINEL_VERSION
+        "sentinel_version": SENTINEL_VERSION,
+        "sentinel_signature": signature,
+        "sentinel_key_fingerprint": key_fingerprint
     }
     
     # Embed metadata
