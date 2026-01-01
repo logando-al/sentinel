@@ -1,0 +1,19 @@
+# PDF Sentinel - Dependencies
+# Python 3.11+
+
+# GUI Framework
+PyQt6>=6.6.0
+qtawesome>=1.3.0
+
+# PDF Manipulation
+pypdf>=4.0.0
+PyMuPDF>=1.23.0
+
+# Folder Watching
+watchdog>=4.0.0
+
+# Report Generation
+reportlab>=4.0.0
+
+# Packaging (dev)
+pyinstaller>=6.0.0
