@@ -144,4 +144,81 @@ pdf-sentinel/
 3. **Build MVP** — Start with single-file stamp + verify
 4. **Iterate** — Add batch, watch, and reports
 ---
+## 7. Version Control & Git Workflow
+
+### Repository
+- **GitHub**: https://github.com/logando-al/sentinel
+
+### Branching Strategy
+| Branch | Purpose |
+|--------|---------|
+| `main` | Production-ready, stable code only |
+| `develop` | Integration branch for features (optional) |
+| `feature/<name>` | New feature development |
+| `fix/<name>` | Bug fixes |
+| `release/<version>` | Release preparation |
+
+### Development Workflow
+```
+1. Create feature branch from main:
+   git checkout main
+   git pull origin main
+   git checkout -b feature/custom-seal-design
+
+2. Develop and commit changes:
+   git add .
+   git commit -m "feat: add custom seal color picker"
+
+3. Push branch to remote:
+   git push -u origin feature/custom-seal-design
+
+4. Create Pull Request on GitHub:
+   - Review code changes
+   - Test functionality
+   - Get approval if team project
+
+5. Merge to main after approval:
+   git checkout main
+   git pull origin main
+   git merge feature/custom-seal-design
+   git push origin main
+
+6. Delete feature branch:
+   git branch -d feature/custom-seal-design
+   git push origin --delete feature/custom-seal-design
+```
+
+### Commit Message Convention
+```
+<type>: <short description>
+
+Types:
+- feat:     New feature
+- fix:      Bug fix
+- docs:     Documentation only
+- style:    Code style (formatting, no logic change)
+- refactor: Code refactoring
+- test:     Adding tests
+- chore:    Build/tooling changes
+```
+
+### Versioning (Semantic)
+```
+MAJOR.MINOR.PATCH
+  │     │     └── Bug fixes, patches
+  │     └──────── New features (backward compatible)
+  └────────────── Breaking changes
+```
+
+### Release Checklist
+- [ ] Update version in `src/main.py`
+- [ ] Update version in `installer.iss`
+- [ ] Update CHANGELOG.md (if exists)
+- [ ] Build exe: `pyinstaller build.spec --clean`
+- [ ] Test exe on clean machine
+- [ ] Compile installer with Inno Setup
+- [ ] Create GitHub Release with tag `v1.x.x`
+- [ ] Attach installer to release
+
+---
 **Ready to start building?** 🚀
