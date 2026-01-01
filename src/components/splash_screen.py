@@ -65,31 +65,28 @@ class SplashScreen(QSplashScreen):
         painter.setBrush(QColor("#0d0d0d"))
         painter.drawRoundedRect(3, 3, width - 6, height - 6, 14, 14)
         
-        # Draw shield icon (simple representation)
-        painter.setBrush(QColor("#88A9C3"))
-        # Shield shape
-        shield_x, shield_y = width // 2 - 40, 60
-        shield_path = [
-            (shield_x, shield_y + 20),
-            (shield_x + 40, shield_y),
-            (shield_x + 80, shield_y + 20),
-            (shield_x + 80, shield_y + 70),
-            (shield_x + 40, shield_y + 100),
-            (shield_x, shield_y + 70),
-        ]
-        from PyQt6.QtGui import QPolygon
-        from PyQt6.QtCore import QPoint
-        polygon = QPolygon([QPoint(int(x), int(y)) for x, y in shield_path])
-        painter.drawPolygon(polygon)
-        
-        # Draw checkmark inside shield
-        painter.setPen(QColor("#0d0d0d"))
-        painter.setPen(Qt.PenStyle.SolidLine)
-        from PyQt6.QtGui import QPen
-        pen = QPen(QColor("#0d0d0d"), 4)
-        painter.setPen(pen)
-        painter.drawLine(shield_x + 25, shield_y + 50, shield_x + 38, shield_y + 65)
-        painter.drawLine(shield_x + 38, shield_y + 65, shield_x + 58, shield_y + 35)
+        # Draw shield icon from file
+        if getattr(sys, 'frozen', False):
+            icon_path = Path(sys._MEIPASS) / "assets" / "icon.png"
+        else:
+            icon_path = Path(__file__).parent.parent / "assets" / "icon.png"
+            
+        if icon_path.exists():
+            icon_pixmap = QPixmap(str(icon_path))
+            # Scale to reasonable size
+            target_size = 100
+            icon_pixmap = icon_pixmap.scaled(target_size, target_size, 
+                                           Qt.AspectRatioMode.KeepAspectRatio, 
+                                           Qt.TransformationMode.SmoothTransformation)
+            
+            # Center horizontally
+            x = (width - icon_pixmap.width()) // 2
+            y = 60
+            painter.drawPixmap(x, y, icon_pixmap)
+        else:
+            # Fallback if icon missing
+            painter.setBrush(QColor("#88A9C3"))
+            painter.drawRect(width // 2 - 25, 60, 50, 60)
         
         # App name
         painter.setPen(QColor("#ffffff"))
@@ -108,7 +105,7 @@ class SplashScreen(QSplashScreen):
         painter.setPen(QColor("#88A9C3"))
         font = QFont("Segoe UI", 10)
         painter.setFont(font)
-        painter.drawText(0, 280, width, 20, Qt.AlignmentFlag.AlignCenter, "v1.3.1")
+        painter.drawText(0, 280, width, 20, Qt.AlignmentFlag.AlignCenter, "v1.3.2")
         
         painter.end()
         return pixmap

@@ -10,7 +10,7 @@ from dataclasses import dataclass
 
 
 GITHUB_REPO = "logando-al/sentinel"
-CURRENT_VERSION = "1.3.1"
+CURRENT_VERSION = "1.3.2"
 
 
 @dataclass

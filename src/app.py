@@ -220,9 +220,10 @@ class PDFSentinelApp(QMainWindow):
         
         about_text = f"""
 <h2>PDF Sentinel</h2>
-<p><b>Version:</b> 1.3.1</p>
+<p><b>Version:</b> 1.3.2</p>
 <p><b>Description:</b> Secure document verification and stamping tool for legal teams.</p>
 <p><b>Your Key Fingerprint:</b><br><code>{fingerprint}</code></p>
+<p><b>Last Updated:</b> 2026-01-01</p>
 <hr>
 <p><b>Features:</b></p>
 <ul>
@@ -231,7 +232,7 @@ class PDFSentinelApp(QMainWindow):
 <li>Visual seal stamping</li>
 <li>Verification reports</li>
 </ul>
-<p style='color: gray; font-size: 9pt;'>© 2026 Sentinel</p>
+<p style='color: gray; font-size: 9pt;'>© 2025-2026 Sentinel</p>
 """
         
         msg = QMessageBox(self)

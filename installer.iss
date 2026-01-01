@@ -2,7 +2,7 @@
 ; Compile this with Inno Setup Compiler (https://jrsoftware.org/isinfo.php)
 
 #define MyAppName "PDF Sentinel"
-#define MyAppVersion "1.3.1"
+#define MyAppVersion "1.3.2"
 #define MyAppPublisher "Sentinel"
 #define MyAppURL "https://github.com/sentinel"
 #define MyAppExeName "PDFSentinel.exe"
@@ -39,6 +39,10 @@ PrivilegesRequiredOverridesAllowed=dialog
 
 ; Visual
 WizardStyle=modern
+
+; Close running application before install
+CloseApplications=force
+CloseApplicationsFilter=*.exe
 
 ; Minimum Windows version
 MinVersion=10.0
