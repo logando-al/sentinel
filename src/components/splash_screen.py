@@ -108,7 +108,7 @@ class SplashScreen(QSplashScreen):
         painter.setPen(QColor("#88A9C3"))
         font = QFont("Segoe UI", 10)
         painter.setFont(font)
-        painter.drawText(0, 280, width, 20, Qt.AlignmentFlag.AlignCenter, "v1.3.0")
+        painter.drawText(0, 280, width, 20, Qt.AlignmentFlag.AlignCenter, "v1.3.1")
         
         painter.end()
         return pixmap

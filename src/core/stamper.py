@@ -15,7 +15,7 @@ from core.hasher import calculate_sha256
 
 # Sentinel metadata keys
 SENTINEL_METADATA_KEY = "sentinel_data"
-SENTINEL_VERSION = "1.3.0"
+SENTINEL_VERSION = "1.3.1"
 
 
 def _calculate_content_hash(doc: fitz.Document) -> str:

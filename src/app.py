@@ -185,10 +185,12 @@ class PDFSentinelApp(QMainWindow):
         self.settings_btn.clicked.connect(lambda: self._switch_view(self.settings_view))
         layout.addWidget(self.settings_btn)
         
-        # Version label
-        version = QLabel("v1.3.0")
+        # Version label (clickable for About)
+        version = QPushButton("v1.3.1")
         version.setObjectName("versionLabel")
-        version.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        version.setFlat(True)
+        version.setCursor(Qt.CursorShape.PointingHandCursor)
+        version.clicked.connect(self._show_about)
         layout.addWidget(version)
         
         return sidebar
@@ -200,3 +202,53 @@ class PDFSentinelApp(QMainWindow):
         # Update button states
         for btn, w in self.nav_buttons:
             btn.setChecked(w == widget)
+    
+    def _show_about(self):
+        """Show About dialog."""
+        from PyQt6.QtWidgets import QMessageBox, QApplication
+        
+        # Get key fingerprint
+        try:
+            from core.signer import get_public_key_pem, get_key_fingerprint
+            public_key = get_public_key_pem()
+            fingerprint = get_key_fingerprint(public_key)
+        except:
+            fingerprint = "Not available"
+        
+        # Store for copy button
+        self._about_fingerprint = fingerprint
+        
+        about_text = f"""
+<h2>PDF Sentinel</h2>
+<p><b>Version:</b> 1.3.1</p>
+<p><b>Description:</b> Secure document verification and stamping tool for legal teams.</p>
+<p><b>Your Key Fingerprint:</b><br><code>{fingerprint}</code></p>
+<hr>
+<p><b>Features:</b></p>
+<ul>
+<li>SHA256 hash verification</li>
+<li>RSA digital signatures</li>
+<li>Visual seal stamping</li>
+<li>Verification reports</li>
+</ul>
+<p style='color: gray; font-size: 9pt;'>© 2026 Sentinel</p>
+"""
+        
+        msg = QMessageBox(self)
+        msg.setWindowTitle("About PDF Sentinel")
+        msg.setTextFormat(Qt.TextFormat.RichText)
+        msg.setText(about_text)
+        msg.setIcon(QMessageBox.Icon.Information)
+        msg.setStandardButtons(QMessageBox.StandardButton.Ok)
+        
+        # Add Copy Key button
+        copy_btn = msg.addButton("Copy Key", QMessageBox.ButtonRole.ActionRole)
+        
+        msg.exec()
+        
+        if msg.clickedButton() == copy_btn:
+            clipboard = QApplication.clipboard()
+            clipboard.setText(fingerprint)
+            QMessageBox.information(self, "Copied", "Key fingerprint copied to clipboard!")
+
+

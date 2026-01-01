@@ -103,6 +103,14 @@ class VerifyViewWidget(QWidget):
         btn_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         btn_layout.setSpacing(12)
         
+        # Copy Hash button
+        self.copy_btn = QPushButton("  Copy Hash")
+        self.copy_btn.setIcon(qta.icon("fa5s.copy", color=ICON_COLOR))
+        self.copy_btn.setIconSize(QSize(14, 14))
+        self.copy_btn.setObjectName("secondaryButton")
+        self.copy_btn.clicked.connect(self._copy_hash)
+        btn_layout.addWidget(self.copy_btn)
+        
         # Generate Report button
         self.report_btn = QPushButton("  Generate Report")
         self.report_btn.setIcon(qta.icon("fa5s.file-alt", color="#000000"))
@@ -244,3 +252,18 @@ class VerifyViewWidget(QWidget):
                 "Error",
                 f"Failed to generate report:\n{str(e)}"
             )
+    
+    def _copy_hash(self):
+        """Copy the hash to clipboard."""
+        if self._last_result and self._last_result.original_hash:
+            from PyQt6.QtWidgets import QApplication
+            clipboard = QApplication.clipboard()
+            clipboard.setText(self._last_result.original_hash)
+            
+            # Show brief confirmation
+            QMessageBox.information(
+                self,
+                "Copied",
+                "Hash copied to clipboard!"
+            )
+

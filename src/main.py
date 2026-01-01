@@ -33,7 +33,7 @@ def main():
     
     app = QApplication(sys.argv)
     app.setApplicationName("PDF Sentinel")
-    app.setApplicationVersion("1.3.0")
+    app.setApplicationVersion("1.3.1")
     app.setOrganizationName("Sentinel")
     
     # Set default font

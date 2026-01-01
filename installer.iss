@@ -2,7 +2,7 @@
 ; Compile this with Inno Setup Compiler (https://jrsoftware.org/isinfo.php)
 
 #define MyAppName "PDF Sentinel"
-#define MyAppVersion "1.3.0"
+#define MyAppVersion "1.3.1"
 #define MyAppPublisher "Sentinel"
 #define MyAppURL "https://github.com/sentinel"
 #define MyAppExeName "PDFSentinel.exe"
