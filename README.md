@@ -89,6 +89,10 @@ sentinel/
 
 MIT License - Free for personal and commercial use.
 
+## Support
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/O4O11UPXXN) 
+
+This support will kept me going for developing more open source and free software.
 ---
 
 Built with 🔐 by Sentinel
